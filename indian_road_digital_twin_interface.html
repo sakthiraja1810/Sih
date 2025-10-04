@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Road Digital Twin Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 30px 0;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .control-panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            height: fit-content;
+        }
+
+        .visualization-panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .section h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .asset-item {
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .asset-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .asset-item.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .map-container {
+            width: 100%;
+            height: 400px;
+            background: #f7fafc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #cbd5e0;
+            margin-bottom: 20px;
+        }
+
+        .map-placeholder {
+            text-align: center;
+            color: #718096;
+        }
+
+        .simulation-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .simulation-controls .btn {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-idle { background: #fbb6ce; }
+        .status-processing { background: #fbd38d; }
+        .status-ready { background: #9ae6b4; }
+
+        .feature-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 5px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .results-panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .metric-label {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .log-container {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            height: 150px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .simulation-controls {
+                flex-direction: column;
+            }
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛣️ Indian Road Digital Twin Platform</h1>
+            <p>Accelerating realistic traffic simulation with AI-powered digital twins of Indian road networks</p>
+        </div>
+
+        <div class="main-grid">
+            <div class="control-panel">
+                <!-- Location Input Section -->
+                <div class="section">
+                    <h3>
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                        Location Setup
+                    </h3>
+                    <div class="form-group">
+                        <label>City/Area</label>
+                        <select id="citySelect">
+                            <option value="">Select City</option>
+                            <option value="mumbai">Mumbai</option>
+                            <option value="delhi">New Delhi</option>
+                            <option value="bangalore">Bangalore</option>
+                            <option value="chennai">Chennai</option>
+                            <option value="kolkata">Kolkata</option>
+                            <option value="pune">Pune</option>
+                            <option value="hyderabad">Hyderabad</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>GPS Coordinates (Optional)</label>
+                        <input type="text" id="coordinates" placeholder="28.6139, 77.2090">
+                    </div>
+                    <div class="form-group">
+                        <label>Area Radius (km)</label>
+                        <input type="range" id="radiusSlider" min="1" max="10" value="3">
+                        <span id="radiusValue">3 km</span>
+                    </div>
+                    <button class="btn" onclick="loadLocation()">Load Location</button>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="locationProgress"></div>
+                    </div>
+                    <div id="locationStatus">
+                        <span class="status-indicator status-idle"></span>
+                        Status: Ready for input
+                    </div>
+                </div>
+
+                <!-- Asset Library Section -->
+                <div class="section">
+                    <h3>
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                        </svg>
+                        Indian Road Assets
+                    </h3>
+                    <div class="feature-tabs">
+                        <button class="tab-btn active" onclick="switchTab('surface')">Surface</button>
+                        <button class="tab-btn" onclick="switchTab('traffic')">Traffic</button>
+                        <button class="tab-btn" onclick="switchTab('infrastructure')">Infra</button>
+                    </div>
+                    
+                    <div id="surface-content" class="tab-content active">
+                        <div class="asset-grid">
+                            <div class="asset-item" onclick="toggleAsset(this, 'potholes')">
+                                <div>🕳️</div>
+                                <div>Potholes</div>
+                            </div>
+                            <div class="asset-item" onclick="toggleAsset(this, 'construction')">
+                                <div>🚧</div>
+                                <div>Construction</div>
+                            </div>
+                            <div class="asset-item" onclick="toggleAsset(this, 'flooding')">
+                                <div>🌊</div>
+                                <div>Flooding</div>
+                            </div>
+                            <div class="asset-item" onclick="toggleAsset(this, 'unpaved')">
+                                <div>🛤️</div>
+                                <div>Unpaved</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="traffic-content" class="tab-content">
+                        <div class="asset-grid">
+                            <div class="asset-item" onclick="toggleAsset(this, 'autostand')">
+                                <div>🛺</div>
+                                <div>Auto Stand</div>
+                            </div>
+                            <div class="asset-item" onclick="toggleAsset(this, 'vendors')">
+                                <div>🏪</div>
+                                <div>Vendors</div>
+                            </div>
+                            <div class="asset-item" onclick="toggleAsset(this, 'parking')">
+                                <div>🅿️</div>
+                                <div>Parking</div>
+                            </div>
+                            <div class="asset-item" onclick="toggleAsset(this, 'cattle')">
+                                <div>🐄</div>
+                                <div>Cattle</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="infrastructure-content" class="tab-content">
+                        <div class="asset-grid">
+                            <div class="asset-item" onclick="toggleAsset(this, 'flyover')">
+                                <div>🌉</div>
+                                <div>Flyover</div>
+                            </div>
+                            <div class="asset-item" onclick="toggleAsset(this, 'underpass')">
+                                <div>🚇</div>
+                                <div>Underpass</div>
+                            </div>
+                            <div class="asset-item" onclick="toggleAsset(this, 'toll')">
+                                <div>💰</div>
+                                <div>Toll Plaza</div>
+                            </div>
+                            <div class="asset-item" onclick="toggleAsset(this, 'signals')">
+                                <div>🚦</div>
+                                <div>Traffic Lights</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scenario Configuration -->
+                <div class="section">
+                    <h3>
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Simulation Scenario
+                    </h3>
+                    <div class="form-group">
+                        <label>Traffic Density</label>
+                        <select id="trafficDensity">
+                            <option value="low">Low (Off-peak)</option>
+                            <option value="medium" selected>Medium (Normal)</option>
+                            <option value="high">High (Rush hour)</option>
+                            <option value="extreme">Extreme (Festival/Crisis)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Weather Conditions</label>
+                        <select id="weather">
+                            <option value="clear" selected>Clear</option>
+                            <option value="light_rain">Light Rain</option>
+                            <option value="heavy_rain">Heavy Rain (Monsoon)</option>
+                            <option value="fog">Fog</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Time of Day</label>
+                        <input type="range" id="timeSlider" min="0" max="23" value="14">
+                        <span id="timeValue">2:00 PM</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visualization-panel">
+                <h3>Digital Twin Visualization</h3>
+                <div class="map-container" id="mapContainer">
+                    <div class="map-placeholder">
+                        <h4>📍 Interactive Map View</h4>
+                        <p>Load a location to see the digital twin</p>
+                        <div id="loadingSpinner" class="loading-spinner" style="display: none; margin-top: 20px;"></div>
+                    </div>
+                </div>
+                
+                <div class="simulation-controls">
+                    <button class="btn" onclick="generateDigitalTwin()" id="generateBtn">Generate Digital Twin</button>
+                    <button class="btn" onclick="runSimulation()" id="simulateBtn" disabled>Run Simulation</button>
+                    <button class="btn" onclick="exportToMATLAB()" id="exportBtn" disabled>Export to MATLAB</button>
+                </div>
+
+                <div class="log-container" id="systemLog">
+                    <div>🚀 Indian Road Digital Twin Platform v1.0 Ready</div>
+                    <div>📊 Asset library loaded: 50+ templates, 100+ scenarios</div>
+                    <div>🤖 AI enhancement modules initialized</div>
+                    <div>⚡ MATLAB/Simulink integration active</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-panel" id="resultsPanel" style="display: none;">
+            <h3>
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                </svg>
+                Simulation Results & Analytics
+            </h3>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value" id="processingTime">2.3s</div>
+                    <div class="metric-label">Processing Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="accuracy">94%</div>
+                    <div class="metric-label">Model Accuracy</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="vehicles">847</div>
+                    <div class="metric-label">Vehicles Simulated</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="junctions">23</div>
+                    <div class="metric-label">Junctions Modeled</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="efficiency">87%</div>
+                    <div class="metric-label">Traffic Efficiency</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="timeReduction">6.2x</div>
+                    <div class="metric-label">Time Reduction vs Manual</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedAssets = new Set();
+        let currentCity = '';
+        let isSimulationReady = false;
+
+        // Update radius display
+        document.getElementById('radiusSlider').addEventListener('input', function() {
+            document.getElementById('radiusValue').textContent = this.value + ' km';
+        });
+
+        // Update time display
+        document.getElementById('timeSlider').addEventListener('input', function() {
+            const hour = parseInt(this.value);
+            const displayTime = hour > 12 ? `${hour-12}:00 PM` : (hour === 0 ? '12:00 AM' : `${hour}:00 AM`);
+            document.getElementById('timeValue').textContent = displayTime;
+        });
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + '-content').classList.add('active');
+        }
+
+        function toggleAsset(element, assetType) {
+            element.classList.toggle('selected');
+            if (selectedAssets.has(assetType)) {
+                selectedAssets.delete(assetType);
+            } else {
+                selectedAssets.add(assetType);
+            }
+            logMessage(`🎯 Asset ${assetType} ${selectedAssets.has(assetType) ? 'selected' : 'deselected'}`);
+        }
+
+        function loadLocation() {
+            const city = document.getElementById('citySelect').value;
+            const coordinates = document.getElementById('coordinates').value;
+            const radius = document.getElementById('radiusSlider').value;
+            
+            if (!city && !coordinates) {
+                alert('Please select a city or enter coordinates');
+                return;
+            }
+            
+            currentCity = city || 'custom';
+            
+            // Show loading
+            document.getElementById('loadingSpinner').style.display = 'block';
+            updateProgress('locationProgress', 0);
+            updateStatus('locationStatus', 'processing', 'Loading location data...');
+            
+            // Simulate location loading process
+            let progress = 0;
+            const loadingInterval = setInterval(() => {
+                progress += 20;
+                updateProgress('locationProgress', progress);
+                
+                if (progress === 20) {
+                    logMessage('📍 Fetching OpenStreetMap data...');
+                } else if (progress === 40) {
+                    logMessage('🛰️ Processing satellite imagery...');
+                } else if (progress === 60) {
+                    logMessage('🤖 AI analyzing road conditions...');
+                } else if (progress === 80) {
+                    logMessage('🏗️ Building base road network...');
+                } else if (progress === 100) {
+                    logMessage(`✅ Location loaded: ${city || coordinates} (${radius}km radius)`);
+                    updateStatus('locationStatus', 'ready', 'Location loaded successfully');
+                    document.getElementById('generateBtn').disabled = false;
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    
+                    // Update map placeholder
+                    document.getElementById('mapContainer').innerHTML = `
+                        <div style="text-align: center; color: #4a5568;">
+                            <h4>📍 ${city ? city.charAt(0).toUpperCase() + city.slice(1) : 'Custom Location'} - Digital Twin Ready</h4>
+                            <p>Road network loaded with ${Math.floor(Math.random() * 50) + 20} junctions</p>
+                            <p>Area coverage: ${radius}km radius</p>
+                            <div style="margin-top: 20px; padding: 20px; background: #f0f8f0; border-radius: 8px; display: inline-block;">
+                                <div>🛣️ Roads: ${Math.floor(Math.random() * 200) + 150}</div>
+                                <div>🚦 Signals: ${Math.floor(Math.random() * 30) + 15}</div>
+                                <div>🏪 POIs: ${Math.floor(Math.random() * 100) + 50}</div>
+                            </div>
+                        </div>
+                    `;
+                    clearInterval(loadingInterval);
+                }
+            }, 800);
+        }
+
+        function generateDigitalTwin() {
+            if (!currentCity) {
+                alert('Please load a location first');
+                return;
+            }
+            
+            logMessage('🚀 Starting digital twin generation...');
+            logMessage(`📊 Selected assets: ${Array.from(selectedAssets).join(', ') || 'None'}`);
+            
+            const trafficDensity = document.getElementById('trafficDensity').value;
+            const weather = document.getElementById('weather').value;
+            const time = document.getElementById('timeSlider').value;
+            
+            logMessage(`⚙️ Configuration: ${trafficDensity} traffic, ${weather} weather, ${time}:00`);
+            
+            // Simulate generation process
+            let progress = 0;
+            const genInterval = setInterval(() => {
+                progress += 25;
+                
+                if (progress === 25) {
+                    logMessage('🎯 Applying Indian road assets...');
+                } else if (progress === 50) {
+                    logMessage('🚗 Generating vehicle behavior models...');
+                } else if (progress === 75) {
+                    logMessage('🌐 Integrating real-time data...');
+                } else if (progress === 100) {
+                    logMessage('✅ Digital twin generated successfully!');
+                    document.getElementById('simulateBtn').disabled = false;
+                    isSimulationReady = true;
+                    
+                    // Update visualization
+                    document.getElementById('mapContainer').innerHTML = `
+                        <div style="text-align: center; color: #4a5568;">
+                            <h4>🎯 Digital Twin Generated</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                    <strong>Assets Applied:</strong><br>
+                                    ${Array.from(selectedAssets).join('<br>') || 'Base road network'}
+                                </div>
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                    <strong>Simulation Ready:</strong><br>
+                                    Traffic: ${trafficDensity}<br>
+                                    Weather: ${weather}<br>
+                                    Time: ${time}:00
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    clearInterval(genInterval);
+                }
+            }, 1000);
+        }
+
+        function runSimulation() {
+            if (!isSimulationReady) {
+                alert('Please generate digital twin first');
+                return;
+            }
+            
+            logMessage('⚡ Starting traffic simulation...');
+            
+            // Simulate running
+            let progress = 0;
+            const simInterval = setInterval(() => {
+                progress += 20;
+                
+                if (progress === 20) {
+                    logMessage('🚗 Initializing vehicle agents...');
+                } else if (progress === 40) {
+                    logMessage('🎮 Running behavioral models...');
+                } else if (progress === 60) {
+                    logMessage('📊 Collecting traffic data...');
+                } else if (progress === 80) {
+                    logMessage('🧮 Computing analytics...');
+                } else if (progress === 100) {
+                    logMessage('✅ Simulation completed!');
+                    document.getElementById('exportBtn').disabled = false;
+                    document.getElementById('resultsPanel').style.display = 'block';
+                    
+                    // Animate metrics
+                    animateMetrics();
+                    
+                    clearInterval(simInterval);
+                }
+            }, 1200);
+        }
+
+        function exportToMATLAB() {
+            logMessage('📤 Exporting to MATLAB/Simulink...');
+            logMessage('📋 Generated files:');
+            logMessage('   - scenario_' + currentCity + '.m');
+            logMessage('   - road_network.slx');
+            logMessage('   - traffic_data.mat');
+            logMessage('   - behavioral_models.m');
+            logMessage('✅ Export completed! Files ready for MATLAB import.');
+            
+            // Simulate download
+            setTimeout(() => {
+                alert('Export completed! Digital twin files are ready for MATLAB integration.');
+            }, 2000);
+        }
+
+        function updateProgress(elementId, percentage) {
+            document.getElementById(elementId).style.width = percentage + '%';
+        }
+
+        function updateStatus(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            const indicator = element.querySelector('.status-indicator');
+            
+            indicator.className = `status-indicator status-${status}`;
+            element.innerHTML = `<span class="status-indicator status-${status}"></span>Status: ${message}`;
+        }
+
+        function logMessage(message) {
+            const logContainer = document.getElementById('systemLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logContainer.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function animateMetrics() {
+            const metrics = {
+                processingTime: { start: 0, end: 2.3, suffix: 's' },
+                accuracy: { start: 0, end: 94, suffix: '%' },
+                vehicles: { start: 0, end: 847, suffix: '' },
+                junctions: { start: 0, end: 23, suffix: '' },
+                efficiency: { start: 0, end: 87, suffix: '%' },
+                timeReduction: { start: 0, end: 6.2, suffix: 'x' }
+            };
+
+            Object.keys(metrics).forEach(key => {
+                animateCounter(key, metrics[key].start, metrics[key].end, metrics[key].suffix, 2000);
+            });
+        }
+
+        function animateCounter(elementId, start, end, suffix, duration) {
+            const element = document.getElementById(elementId);
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const current = start + (end - start) * easeOutCubic(progress);
+                const displayValue = suffix === 's' || suffix === 'x' ? 
+                    current.toFixed(1) : Math.floor(current);
+                
+                element.textContent = displayValue + suffix;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        // Initialize demo data on page load
+        window.addEventListener('load', function() {
+            logMessage('🎯 Platform initialized with MathWorks integration');
+            logMessage('📚 Asset library: 50+ Indian road templates loaded');
+            logMessage('🤖 AI modules: Computer vision and behavioral modeling ready');
+            logMessage('⚡ Ready to create digital twins for Indian road networks');
+            
+            // Add some interactive demo functionality
+            setTimeout(() => {
+                logMessage('💡 Tip: Select a city and assets to get started!');
+            }, 3000);
+        });
+
+        // Add keyboard shortcuts for power users
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'g') {
+                e.preventDefault();
+                if (!document.getElementById('generateBtn').disabled) {
+                    generateDigitalTwin();
+                }
+            } else if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                if (!document.getElementById('simulateBtn').disabled) {
+                    runSimulation();
+                }
+            } else if (e.ctrlKey && e.key === 'e') {
+                e.preventDefault();
+                if (!document.getElementById('exportBtn').disabled) {
+                    exportToMATLAB();
+                }
+            }
+        });
+
+        // Add realistic data updates every few seconds
+        setInterval(() => {
+            if (isSimulationReady) {
+                const updates = [
+                    '📊 Real-time traffic data updated',
+                    '🌦️ Weather conditions synchronized',
+                    '🚗 Vehicle behavior patterns analyzed',
+                    '🎯 Model accuracy improved to 95.2%',
+                    '⚡ Processing speed optimized',
+                    '🔄 Asset library auto-updated'
+                ];
+                
+                const randomUpdate = updates[Math.floor(Math.random() * updates.length)];
+                logMessage(randomUpdate);
+            }
+        }, 15000);
+
+        // Add responsive mobile menu toggle
+        function toggleMobileMenu() {
+            const controlPanel = document.querySelector('.control-panel');
+            controlPanel.style.display = controlPanel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Enhanced asset selection with tooltip information
+        function showAssetInfo(assetType) {
+            const assetInfo = {
+                'potholes': 'Realistic pothole patterns based on Indian road conditions',
+                'construction': 'Construction zones with lane restrictions and detours',
+                'flooding': 'Monsoon flooding effects on traffic flow',
+                'unpaved': 'Unpaved road segments common in developing areas',
+                'autostand': 'Auto-rickshaw stands with passenger pickup patterns',
+                'vendors': 'Street vendors affecting traffic flow',
+                'parking': 'Informal parking areas and roadside parking',
+                'cattle': 'Cattle crossing patterns and grazing areas',
+                'flyover': 'Multi-level flyover structures',
+                'underpass': 'Underground passages and tunnels',
+                'toll': 'Toll plaza with multiple payment lanes',
+                'signals': 'Indian-style traffic signal behavior'
+            };
+            
+            return assetInfo[assetType] || 'Indian road feature';
+        }
+
+        // Add tooltip functionality
+        document.querySelectorAll('.asset-item').forEach(item => {
+            item.addEventListener('mouseenter', function(e) {
+                const assetType = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = showAssetInfo(assetType);
+                tooltip.style.cssText = `
+                    position: absolute;
+                    background: rgba(0,0,0,0.8);
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    max-width: 200px;
+                    z-index: 1000;
+                    pointer-events: none;
+                `;
+                document.body.appendChild(tooltip);
+                
+                const rect = this.getBoundingClientRect();
+                tooltip.style.left = (rect.left + rect.width/2 - tooltip.offsetWidth/2) + 'px';
+                tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+                
+                this.addEventListener('mouseleave', function() {
+                    document.body.removeChild(tooltip);
+                }, { once: true });
+            });
+        });
+
+        // Advanced simulation features
+        function runAdvancedSimulation() {
+            const advancedFeatures = [
+                'Multi-modal transport simulation',
+                'Emergency vehicle routing',
+                'Festival crowd management',
+                'Monsoon flood response',
+                'Traffic signal optimization',
+                'Pedestrian flow analysis'
+            ];
+            
+            advancedFeatures.forEach((feature, index) => {
+                setTimeout(() => {
+                    logMessage(`🎯 ${feature} module activated`);
+                }, index * 1000);
+            });
+        }
+
+        // Export functionality with different formats
+        function exportToFormat(format) {
+            const formats = {
+                'matlab': {
+                    files: ['scenario.m', 'road_network.slx', 'traffic_data.mat'],
+                    description: 'MATLAB/Simulink compatible files'
+                },
+                'sumo': {
+                    files: ['network.net.xml', 'routes.rou.xml', 'config.sumocfg'],
+                    description: 'SUMO traffic simulation files'
+                },
+                'carla': {
+                    files: ['town.xodr', 'scenario.py', 'weather.json'],
+                    description: 'CARLA simulator compatible files'
+                }
+            };
+            
+            const formatData = formats[format];
+            if (formatData) {
+                logMessage(`📤 Exporting to ${format.toUpperCase()}...`);
+                formatData.files.forEach(file => {
+                    logMessage(`   📄 Generated: ${file}`);
+                });
+                logMessage(`✅ ${formatData.description} ready for download`);
+            }
+        }
+    </script>
+</body>
+</html>
